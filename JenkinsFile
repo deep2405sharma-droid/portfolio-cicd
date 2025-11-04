@@ -5,7 +5,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/your-username/portfolio-cicd.git'
+                    url: 'https://github.com/deep2405sharma-droid/portfolio-cicd.git'
             }
         }
 
