@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "portfolio-app"
-        DEPLOY_DIR = "/var/www/portfolio"
+        IMAGE_NAME = "portfolio-app"
+        CONTAINER_NAME = "portfolio-container"
     }
 
     stages {
@@ -15,18 +15,20 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                echo 'Building Docker image...'
-                sh 'sudo docker build -t $DOCKER_IMAGE .'
+                echo '🚀 Building Docker image...'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
         stage('Deploy to EC2') {
             steps {
-                echo 'Deploying Docker container...'
+                echo '📦 Deploying container on EC2...'
+                // Stop and remove any existing container
                 sh '''
-                    sudo docker stop $DOCKER_IMAGE || true
-                    sudo docker rm $DOCKER_IMAGE || true
-                    sudo docker run -d -p 80:80 --name $DOCKER_IMAGE $DOCKER_IMAGE
+                if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
+                    docker stop $CONTAINER_NAME && docker rm $CONTAINER_NAME
+                fi
+                docker run -d -p 80:80 --name $CONTAINER_NAME $IMAGE_NAME
                 '''
             }
         }
@@ -34,7 +36,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ Deployment completed successfully!'
+            echo '✅ Deployment successful!'
         }
         failure {
             echo '❌ Deployment failed!'
